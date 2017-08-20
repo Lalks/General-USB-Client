@@ -600,7 +600,6 @@ Suddin0 - uddin.samad0@gmail.com
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">À propos</property>
     <property name="resizable">False</property>
-    <property name="destroy_with_parent">True</property>
     <property name="show_menubar">False</property>
     <signal name="destroy" handler="on_windowLicence_destroy" swapped="no"/>
     <child>

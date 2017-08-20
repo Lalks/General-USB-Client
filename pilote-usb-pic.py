@@ -28,6 +28,8 @@ from gi.repository import Gtk
 
 import subprocess # for lsusb command output
 
+import sys
+
 import usb.core # to use pyusb
 import usb.util # to use pyusb
 
@@ -45,8 +47,10 @@ class managegui:
 		self.builder.connect_signals(self)
 
 		self.window = self.builder.get_object("window")
+		self.windowLicence = self.builder.get_object("windowLicence")
 
 		self.Licence = self.builder.get_object("Licence")
+		
 
 		self.boutonRecevoir = self.builder.get_object("boutonRecevoir")
 		self.inputRecevoir = self.builder.get_object("inputRecevoir")
@@ -67,15 +71,16 @@ class managegui:
 	# Need the destroy function to quit when the window is destroy
 	def on_window_destroy(self, object, data=None):
 		Gtk.main_quit()
+		sys.exit(0)
 
-	# "Recevoir" button
+	# Receive button
 	def on_boutonRecevoir_clicked(self, object, data=None):
 		#usbPort = self.inputPort.get_text()
 		""" ICI IL FAUT LIRE LES DONNEES DU BUS ET INSÉRER DANS LA VARIABLE UsbDataRead """
 		UsbDataRead = "Default value"
 		self.inputRecevoir.set_text(UsbDataRead)
 
-	# "Envoyer" button
+	# Send button
 	def on_boutonEnvoyer_clicked(self, object, data=None):
 		usbPort = self.inputPort.get_text()
 		""" ICI IL FAUT ÉCRIRE LES DONNEES VERS LE BUS """
@@ -128,7 +133,12 @@ class managegui:
 		except ValueError:
 			self.detectLabel.set_text("VID/PID incorrect")
 			self.labelLastchange.set_text("Échec de connexion")
-		
+	
+	def on_Licence_activate(self, object, data=None):
+		self.windowLicence.show()
+	def on_windowLicence_destroy(self, object, data=None):
+		print("Destoyed") # Debug purpose
+		self.windowLicence.hide() # HAVE TO CHECK AROUND HERE !! IT DOESN'T QUIT PROPERLY THE WINDOW
 
 if __name__ == "__main__":
 	main = managegui()
