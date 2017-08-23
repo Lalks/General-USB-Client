@@ -4,6 +4,19 @@
 
 """
 
+This program is made to communicate with a Microchip PIC microcontroller
+via the Universal Serial Bus.
+
+The main functionnality doesn't work yet. The skeleton of the application
+is made, but the USB communication part is still missing ; it is under
+construction, using pyusb.
+
+The goal of this application is to simply read data from the microcontroller
+or to read some.
+
+
+
+
 Copyright (C) 2017  Lalks
 
 This program is free software: you can redistribute it and/or modify
@@ -112,22 +125,36 @@ class managegui:
 				self.detectLabel.set_markup("<span foreground='#DD0000'>Non trouvé</span>")
 				self.labelLastchange.set_text("Échec de connexion")
 			else:
-				""" ICI IL FAUT LANCER L'INITIALISATION ENTRE HOST ET DEVICE """
-
-				""" FOLLOWED TUTORIAL OF WALAC ! """
+				# À PARTIR D'ICI, ON CONSIDÈRE QUE LE MCU EST CONNECTÉ À L'ORDINATEUR
+				# PRÈS À COMMUNIQUER DES DONNÉES (CHECK PAGE 192 DOC PIC)
+				
 				"""
+				DONC À PARTIR D'ICI, IL FAUT PROCÉDER À "SET CONFIGURATION", ÉTAPE 8 ENUMARATION
+
+				pyusb nous permet de ne pas se compliquer la vie à vérifier le device descriptor
+				pour mettre en place une configuration spécifique : tout se fait automatiquement
+				"""
+				# Set the configuration
 				device.set_configuration()
+
+				# Get an endpoint instance | NEED TO CLARIFY WHAT IS DONE HERE
 				cfg = device.get_active_configuration()
 				intf = cfg[(0,0)]
 
-				ep = usb.util.find_descriptor(intf, custom_match = lambda e: \
+				# NEED TO CLARIFY WHAT IS DONE HERE
+				ep = usb.util.find_descriptor(
+					intf,
+					# Match the first OUT Endpoint 
+					custom_match = \
+					lambda e: \
 						usb.util.endpoint_direction(e.bEndpointAddress) == \
 						usb.util.ENDPOINT_OUT)
 
 				assert ep is not None
 
+				# Write data
 				ep.write(0xF0)
-				"""
+				
 				self.detectLabel.set_markup("<span foreground='#00AA00'>Connecté !</span>")
 				self.labelLastchange.set_text("Connexion établie")
 		except ValueError:
