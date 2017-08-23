@@ -4,8 +4,7 @@
 
 """
 
-This program is made to communicate with a Microchip PIC microcontroller
-via the Universal Serial Bus.
+This program is made to communicate with any USB device via the Universal Serial Bus.
 
 The main functionnality doesn't work yet. The skeleton of the application
 is made, but the USB communication part is still missing ; it is under
@@ -39,9 +38,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-import subprocess # for lsusb command output
+import subprocess # for lsusb command output, will be removed soon
 
 import sys
+import os
 
 import usb.core # to use pyusb
 import usb.util # to use pyusb
@@ -101,15 +101,26 @@ class managegui:
 		print(UsbDataWrite)
 
 	# Refresh button
+	"""
+	HAVE TO MAKE IT COMPATIBLE WITH WINDOWS SYSTEMS BY MAKING THE SAME OUTPUT
+	WITH PYUSB WITHOUT USING ANY SYSTEM COMMAND AS DONE HERE (lsusb).
+	in clear : replace the 'lsusb' command which outputs the devices connected
+			by doing our own function to reproduce the output
+	"""
 	def on_boutonRefresh_clicked(self, object, data=None):
-		command = "lsusb"
-		process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-		output, error = process.communicate()
-		if error == None:
-			self.terminalBuffer.set_text(output.decode("utf-8"))
-			self.labelLastchange.set_text("Liste des appareils rafraichie")
+		if os.name == 'posix':
+			command = "lsusb"
+			process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+			output, error = process.communicate()
+			if error == None:
+				self.terminalBuffer.set_text(output.decode("utf-8"))
+				self.labelLastchange.set_text("Liste des appareils rafraichie")
+			else:
+				self.terminalBuffer.set_text(error.decode("utf-8"))
+				self.labelLastchange.set_text("Échec de rafraichissement de la liste des appareils")
 		else:
-			self.terminalBuffer.set_text(error.decode("utf-8"))
+			output = "Not compatible with your system yet"
+			self.terminalBuffer.set_text(output.decode("utf-8"))
 			self.labelLastchange.set_text("Échec de rafraichissement de la liste des appareils")
 
 
