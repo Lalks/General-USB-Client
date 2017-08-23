@@ -22,4 +22,16 @@ Tested on :
 	- Arch Linux with XFCE
 
 ## Screenshot
-![alt text](https://github.com/Lalks/USB-Driver-for-PIC/blob/master/SCREENSHOTS/screenshot-01.png)
+![alt text](https://github.com/Lalks/General-USB-Client/blob/master/SCREENSHOTS/screenshot-01.png)
+
+## Changelog
+0.01 - updated widgets' positions (progress bars, buttons, entries)
+	 - replaced the lsusb command output by a function made in the program with pyusb
+	 - added 'extended' mode for the output about the devices that are connected to the computer
+
+## To do
+	 [ ] Finish the USB functionnality (backend)
+	 [ ] Clean up the code
+	 [ ] Add better comments at the beginning of the source file
+	 [ ] Translations (at least EN, FR)
+	 [ ] Replace the TextView widget by a TreeView

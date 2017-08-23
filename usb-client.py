@@ -31,14 +31,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+CHANGELOG
+0.01 - updated widgets' positions (progress bars, buttons, entries)
+	 - replaced the lsusb command output by a function made in the program with pyusb
+	 - added 'extended' mode for the output about the devices that are connected to the computer
+	 - 
+
+
+
 """
 
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
-import subprocess # for lsusb command output, will be removed soon
+from gi.repository import Gtk, Gdk, Pango
 
 import sys
 import os
@@ -46,11 +53,13 @@ import os
 import usb.core # to use pyusb
 import usb.util # to use pyusb
 
+
 """
 SEE THE GIT PAGE TO USE PYUSB CORRECTLY
 
 https://github.com/walac/pyusb/blob/master/docs/tutorial.rst
 """
+
 
 class managegui:
 	def __init__(self):
@@ -69,15 +78,31 @@ class managegui:
 		self.inputRecevoir = self.builder.get_object("inputRecevoir")
 		self.boutonEnvoyer = self.builder.get_object("boutonEnvoyer")
 		self.inputEnvoyer = self.builder.get_object("inputEnvoyer")
-		self.inputPort = self.builder.get_object("inputPort")
+
+
+		self.detectGrid = self.builder.get_object("detectGrid")
+
+		self.boutonConnect = self.builder.get_object("boutonConnect")
+
 		self.terminalOutput = self.builder.get_object("terminalOutput")
 		self.terminalBuffer = self.builder.get_object("terminalBuffer")
+		self.terminalOutput.override_font( Pango.font_description_from_string('Roboto Mono 9') )
+
 		self.detectLabel = self.builder.get_object("detectLabel")
+
+		self.verboseCheck = self.builder.get_object("verboseCheck")
+
+		
 
 		self.inputVID = self.builder.get_object("inputVID")
 		self.inputPID = self.builder.get_object("inputPID")
 
+
 		self.labelLastchange = self.builder.get_object("labelLastchange")
+
+
+		self.detectGrid.set_focus_chain([self.inputVID, self.inputPID, self.boutonConnect])
+
 
 		self.window.show_all()
 
@@ -101,34 +126,62 @@ class managegui:
 		print(UsbDataWrite)
 
 	# Refresh button
-	"""
-	HAVE TO MAKE IT COMPATIBLE WITH WINDOWS SYSTEMS BY MAKING THE SAME OUTPUT
-	WITH PYUSB WITHOUT USING ANY SYSTEM COMMAND AS DONE HERE (lsusb).
-	in clear : replace the 'lsusb' command which outputs the devices connected
-			by doing our own function to reproduce the output
-	"""
+	""" The output of the 'lsusb' command is more precise than the function of usb.core """
 	def on_boutonRefresh_clicked(self, object, data=None):
-		if os.name == 'posix':
-			command = "lsusb"
-			process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-			output, error = process.communicate()
-			if error == None:
-				self.terminalBuffer.set_text(output.decode("utf-8"))
-				self.labelLastchange.set_text("Liste des appareils rafraichie")
-			else:
-				self.terminalBuffer.set_text(error.decode("utf-8"))
-				self.labelLastchange.set_text("Échec de rafraichissement de la liste des appareils")
-		else:
-			output = "Not compatible with your system yet"
-			self.terminalBuffer.set_text(output.decode("utf-8"))
-			self.labelLastchange.set_text("Échec de rafraichissement de la liste des appareils")
+		verbose = self.verboseCheck.get_active()
+		devices = usb.core.find(True)
+		strings = ""
+		output1 = ""
 
+		for device in devices:
+			# Get hexadecimal values (with leading zeros) as strings
+			strvendid = str("%0.4X" % device.idVendor)
+			strprodid = str("%0.4X" % device.idProduct)
+
+
+			### GET THE VENDOR'S AND PRODUCT'S NAME FROM THE IDS
+			vendor = "Unkown vendor"
+			product = "Unkown product"
+			vf = 0 # vendor found flag
+			with open("usb.ids") as usbids_file:
+				for line in usbids_file:
+					if not vf:
+						if not line[0] == '\t' and not line[0] == '#' and not line[0] == '\n':
+							if int(strvendid, 16) == int(line[:4], 16):
+								vendor = line[6:-1]
+								vf = 1
+					else:
+						if line[0] == '\t' and not line[0] == '#' and not line[0] == '\n':
+							if int(strprodid, 16) == int(line[1:5], 16):
+								product = line[7:-1]
+			usbids_file.close()
+
+			if not verbose:
+				output1 += "ID %s:%s %s %s\n" % (strvendid, strprodid, vendor, product)
+			else:
+				strings += "%s\n\n" % str(device)
+
+		if verbose:
+			output = usb.core._DescriptorInfo(strings)
+			self.terminalBuffer.set_text(output)
+		else:
+			tip = "    VID:PID  VENDOR AND PRODUCT INFORMATIONS\n"
+			self.terminalBuffer.set_text(tip+output1)
+		self.labelLastchange.set_text("Liste des appareils rafraichie")
+	
+	def on_inputVID_key_press_event(self, object, ev, data=None):
+		if ev.keyval == Gdk.KEY_Return:
+			self.boutonConnect.activate()
+	def on_inputPID_key_press_event(self, object, ev, data=None):
+		if ev.keyval == Gdk.KEY_Return:
+			self.boutonConnect.activate()
 
 	# Connect button
 	def on_boutonConnect_clicked(self, object, data=None):
 		try:
 			VID = int(self.inputVID.get_text(), 16)
 			PID = int(self.inputPID.get_text(), 16)
+
 			# Search the device
 			device = usb.core.find(idVendor=VID, idProduct=PID)
 
@@ -137,19 +190,23 @@ class managegui:
 				self.labelLastchange.set_text("Échec de connexion")
 			else:
 				# À PARTIR D'ICI, ON CONSIDÈRE QUE LE MCU EST CONNECTÉ À L'ORDINATEUR
-				# PRÈS À COMMUNIQUER DES DONNÉES (CHECK PAGE 192 DOC PIC)
+				# PRÈS À COMMUNIQUER DES DONNÉES
+				# La première étape à partir d'ici est l'énumération 
+
+				# Lalks' note : (CHECK PAGE 192 DOC PIC18F2455)
 				
 				"""
-				DONC À PARTIR D'ICI, IL FAUT PROCÉDER À "SET CONFIGURATION", ÉTAPE 8 ENUMARATION
+				DONC À PARTIR D'ICI, IL FAUT PROCÉDER À "SET CONFIGURATION", ÉTAPE 8 ENUMERATION
 
 				pyusb nous permet de ne pas se compliquer la vie à vérifier le device descriptor
 				pour mettre en place une configuration spécifique : tout se fait automatiquement
 				"""
 
 				""" I COMMENTED TO NOT DAMAGE DEVICE WHEN CLICKED THE BUTTON
-					TO UNCOMMENT WHEN SURE OF THE FUNCTION !
+					(TO UNCOMMENT WHEN SURE OF THE FUNCTION !)
 
-				# Set the configuration
+				### SET THE CONFIGURATION
+				# Sets the first configuration
 				device.set_configuration()
 
 				# Get an endpoint instance | NEED TO CLARIFY WHAT IS DONE HERE

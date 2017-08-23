@@ -112,6 +112,7 @@
             <child>
               <object class="GtkEntry" id="inputRecevoir">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">15</property>
                 <property name="margin_right">7</property>
@@ -120,6 +121,7 @@
                 <property name="hexpand">True</property>
                 <property name="editable">False</property>
                 <property name="max_width_chars">40</property>
+                <property name="caps_lock_warning">False</property>
                 <property name="placeholder_text" translatable="yes">Données reçues</property>
               </object>
               <packing>
@@ -234,27 +236,24 @@
           </packing>
         </child>
         <child>
-          <object class="GtkGrid">
+          <object class="GtkGrid" id="detectGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="valign">center</property>
             <property name="margin_left">15</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkButton" id="boutonRefresh">
+                <property name="label">gtk-refresh</property>
+                <property name="width_request">120</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="margin_left">7</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="halign">start</property>
                 <property name="margin_right">7</property>
-                <property name="label" translatable="yes">Status :</property>
-                <property name="justify">right</property>
-                <property name="selectable">True</property>
-                <property name="single_line_mode">True</property>
-                <attributes>
-                  <attribute name="font-desc" value="Roboto 10"/>
-                  <attribute name="underline" value="True"/>
-                </attributes>
+                <property name="hexpand">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_boutonRefresh_clicked" swapped="no"/>
+                <accelerator key="F5" signal="clicked"/>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -262,64 +261,22 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="detectLabel">
-                <property name="width_request">-1</property>
+              <object class="GtkCheckButton" id="verboseCheck">
+                <property name="label" translatable="yes">Étendu</property>
+                <property name="width_request">120</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
                 <property name="halign">start</property>
                 <property name="valign">center</property>
-                <property name="margin_left">4</property>
                 <property name="margin_right">7</property>
-                <property name="label" translatable="yes">Non connecté</property>
-                <property name="use_markup">True</property>
-                <property name="selectable">True</property>
-                <property name="ellipsize">end</property>
-                <property name="width_chars">15</property>
-                <property name="single_line_mode">True</property>
-                <property name="max_width_chars">15</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="boutonRefresh">
-                <property name="label">gtk-refresh</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="halign">end</property>
-                <property name="margin_left">7</property>
-                <property name="margin_right">15</property>
+                <property name="margin_top">7</property>
                 <property name="hexpand">True</property>
-                <property name="use_stock">True</property>
-                <property name="image_position">right</property>
-                <signal name="clicked" handler="on_boutonRefresh_clicked" swapped="no"/>
-                <accelerator key="F5" signal="clicked"/>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="left_attach">6</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="inputVID">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="halign">end</property>
-                <property name="valign">end</property>
-                <property name="margin_right">5</property>
-                <property name="max_length">4</property>
-                <property name="width_chars">5</property>
-                <property name="caps_lock_warning">False</property>
-                <property name="primary_icon_tooltip_text" translatable="yes">Vendor ID</property>
-                <property name="placeholder_text" translatable="yes">VID</property>
-                <property name="input_hints">GTK_INPUT_HINT_UPPERCASE_CHARS | GTK_INPUT_HINT_NONE</property>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">0</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
@@ -336,26 +293,30 @@
                 <property name="primary_icon_tooltip_text" translatable="yes">Product ID</property>
                 <property name="placeholder_text" translatable="yes">PID</property>
                 <property name="input_hints">GTK_INPUT_HINT_UPPERCASE_CHARS | GTK_INPUT_HINT_NONE</property>
+                <signal name="key-press-event" handler="on_inputPID_key_press_event" swapped="no"/>
               </object>
               <packing>
-                <property name="left_attach">3</property>
-                <property name="top_attach">0</property>
+                <property name="left_attach">5</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="boutonConnect">
-                <property name="label">Se connecter</property>
+              <object class="GtkEntry" id="inputVID">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="halign">start</property>
-                <property name="margin_left">5</property>
-                <property name="image_position">right</property>
-                <signal name="clicked" handler="on_boutonConnect_clicked" swapped="no"/>
-                <accelerator key="F5" signal="clicked"/>
+                <property name="halign">end</property>
+                <property name="valign">end</property>
+                <property name="margin_right">5</property>
+                <property name="max_length">4</property>
+                <property name="width_chars">5</property>
+                <property name="caps_lock_warning">False</property>
+                <property name="primary_icon_tooltip_text" translatable="yes">Vendor ID</property>
+                <property name="placeholder_text" translatable="yes">VID</property>
+                <property name="input_hints">GTK_INPUT_HINT_UPPERCASE_CHARS | GTK_INPUT_HINT_NONE</property>
+                <signal name="key-press-event" handler="on_inputVID_key_press_event" swapped="no"/>
               </object>
               <packing>
-                <property name="left_attach">4</property>
+                <property name="left_attach">5</property>
                 <property name="top_attach">0</property>
               </packing>
             </child>
@@ -363,13 +324,71 @@
               <object class="GtkSeparator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">20</property>
-                <property name="margin_right">20</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
               </object>
               <packing>
-                <property name="left_attach">5</property>
+                <property name="left_attach">4</property>
+                <property name="top_attach">0</property>
+                <property name="height">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="boutonConnect">
+                <property name="label">Se connecter</property>
+                <property name="width_request">110</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="halign">end</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
+                <property name="image_position">right</property>
+                <signal name="clicked" handler="on_boutonConnect_clicked" swapped="no"/>
+                <accelerator key="F5" signal="clicked"/>
+              </object>
+              <packing>
+                <property name="left_attach">6</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="detectLabel">
+                <property name="width_request">110</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="label" translatable="yes">Non connecté</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+                <property name="selectable">True</property>
+                <property name="ellipsize">end</property>
+                <property name="width_chars">13</property>
+                <property name="max_width_chars">13</property>
+              </object>
+              <packing>
+                <property name="left_attach">6</property>
                 <property name="top_attach">0</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -379,25 +398,35 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView" id="terminalOutput">
+          <object class="GtkScrolledWindow">
             <property name="height_request">200</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="margin_top">15</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
-            <property name="border_width">2</property>
-            <property name="vscroll_policy">natural</property>
-            <property name="editable">False</property>
-            <property name="wrap_mode">word</property>
-            <property name="cursor_visible">False</property>
-            <property name="buffer">terminalBuffer</property>
-            <property name="overwrite">True</property>
-            <property name="accepts_tab">False</property>
-            <property name="monospace">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="terminalOutput">
+                <property name="height_request">200</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="border_width">2</property>
+                <property name="vscroll_policy">natural</property>
+                <property name="editable">False</property>
+                <property name="wrap_mode">word</property>
+                <property name="cursor_visible">False</property>
+                <property name="buffer">terminalBuffer</property>
+                <property name="overwrite">True</property>
+                <property name="accepts_tab">False</property>
+                <property name="monospace">True</property>
+              </object>
+            </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">6</property>
           </packing>
@@ -460,7 +489,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;a href="https://github.com/Lalks/USB-Client-for-PIC/"&gt;GitHub Repository&lt;/a&gt;</property>
+                <property name="label" translatable="yes">&lt;a href="https://github.com/Lalks/General-USB-Client/"&gt;GitHub Repository&lt;/a&gt;</property>
                 <property name="use_markup">True</property>
                 <property name="use_underline">True</property>
                 <property name="selectable">True</property>
@@ -474,7 +503,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">version 0.0</property>
+                <property name="label" translatable="yes">Version 0.01</property>
                 <property name="selectable">True</property>
                 <attributes>
                   <attribute name="font-desc" value="Roboto 10"/>
@@ -511,7 +540,7 @@
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
