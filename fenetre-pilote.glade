@@ -460,7 +460,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;a href="https://github.com/Lalks/USB-Client-for-PIC/"&gt;GitHub Repository&lt;/a&gt;</property>
+                <property name="label" translatable="yes">&lt;a href="https://github.com/Lalks/General-USB-Client/"&gt;GitHub Repository&lt;/a&gt;</property>
                 <property name="use_markup">True</property>
                 <property name="use_underline">True</property>
                 <property name="selectable">True</property>
@@ -511,7 +511,7 @@
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>

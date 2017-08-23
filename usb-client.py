@@ -145,6 +145,10 @@ class managegui:
 				pyusb nous permet de ne pas se compliquer la vie à vérifier le device descriptor
 				pour mettre en place une configuration spécifique : tout se fait automatiquement
 				"""
+
+				""" I COMMENTED TO NOT DAMAGE DEVICE WHEN CLICKED THE BUTTON
+					TO UNCOMMENT WHEN SURE OF THE FUNCTION !
+
 				# Set the configuration
 				device.set_configuration()
 
@@ -168,6 +172,12 @@ class managegui:
 				
 				self.detectLabel.set_markup("<span foreground='#00AA00'>Connecté !</span>")
 				self.labelLastchange.set_text("Connexion établie")
+				"""
+
+				# THE TWO NEXT LINES HAVE TO BE DELETED WHEN THE FUNCTION WORKS AND IS UNCOMMENTED
+				self.detectLabel.set_markup("<span foreground='#00BBFF'>Coming soon !</span>")
+				self.labelLastchange.set_text("La fonction n'est pas encore prête")
+
 		except ValueError:
 			self.detectLabel.set_text("VID/PID incorrect")
 			self.labelLastchange.set_text("Échec de connexion")
