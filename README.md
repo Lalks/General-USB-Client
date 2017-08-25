@@ -35,6 +35,7 @@ Tested on :
 - changed icon
 - changed format Credits and Licence windows
 - fix display of Credits window
+
 **0.01**
 - updated widgets' positions (progress bars, buttons, entries)
 - replaced the lsusb command output by a function made in the program with pyusb (with Vendor and Product names resolver from IDs) 
