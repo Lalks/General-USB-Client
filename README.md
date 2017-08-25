@@ -25,9 +25,24 @@ Tested on :
 ![alt text](https://github.com/Lalks/General-USB-Client/blob/master/SCREENSHOTS/screenshot-01.png)
 
 ## Changelog
-0.01 - updated widgets' positions (progress bars, buttons, entries)
-	 - replaced the lsusb command output by a function made in the program with pyusb
-	 - added 'extended' mode for the output about the devices that are connected to the computer
+**0.02**
+- finished non-tested backend of the receive function
+- finished non-tested backend of the send function
+- finished non-tested backend of the connect function
+- fixed bug on Return key shortcut on PID and VID entries
+- updated title on Glade file
+- changed font face of the textview 'terminalOutput'
+- changed icon
+- changed format Credits and Licence windows
+- fix display of Credits window
+**0.01**
+- updated widgets' positions (progress bars, buttons, entries)
+- replaced the lsusb command output by a function made in the program with pyusb (with Vendor and Product names resolver from IDs) 
+- added 'extended' mode for the output about the devices that are connected to the computer
+- changed font face of the textview 'terminalOutput'
+- added Return key shortcut on PID and VID entries
+- fixed child list to be able to Tab on VID -> PID -> Connect Button
+
 
 ## To do
 	 [ ] Finish the USB functionnality (backend)

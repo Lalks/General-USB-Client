@@ -33,11 +33,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 CHANGELOG
-0.01 - updated widgets' positions (progress bars, buttons, entries)
-	 - replaced the lsusb command output by a function made in the program with pyusb
-	 - added 'extended' mode for the output about the devices that are connected to the computer
-	 - 
+0.02 - finished non-tested backend of the receive function
+	 - finished non-tested backend of the send function
+	 - finished non-tested backend of the connect function
+	 - fixed bug on Return key shortcut on PID and VID entries
+	 - updated title on Glade file
+	 - changed font face of the textview 'terminalOutput'
+	 - changed icon
+	 - changed format Credits and Licence windows
+	 - fix display of Credits window
 
+0.01 - updated widgets' positions (progress bars, buttons, entries)
+	 - replaced the lsusb command output by a function made in the program with pyusb (with Vendor and Product names resolver from IDs) 
+	 - added 'extended' mode for the output about the devices that are connected to the computer
+	 - changed font face of the textview 'terminalOutput'
+	 - added Return key shortcut on PID and VID entries
+	 - fixed child list to be able to Tab on VID -> PID -> Connect Button
 
 
 """
@@ -45,7 +56,7 @@ CHANGELOG
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, Pango
+from gi.repository import Gtk, Pango
 
 import sys
 import os
@@ -70,8 +81,10 @@ class managegui:
 
 		self.window = self.builder.get_object("window")
 		self.windowLicence = self.builder.get_object("windowLicence")
+		self.windowCredits = self.builder.get_object("windowCredits")
 
 		self.Licence = self.builder.get_object("Licence")
+		self.Credits = self.builder.get_object("Credits")
 		
 
 		self.boutonRecevoir = self.builder.get_object("boutonRecevoir")
@@ -86,7 +99,7 @@ class managegui:
 
 		self.terminalOutput = self.builder.get_object("terminalOutput")
 		self.terminalBuffer = self.builder.get_object("terminalBuffer")
-		self.terminalOutput.override_font( Pango.font_description_from_string('Roboto Mono 9') )
+		self.terminalOutput.override_font( Pango.font_description_from_string('Monospace 9') )
 
 		self.detectLabel = self.builder.get_object("detectLabel")
 
@@ -103,6 +116,10 @@ class managegui:
 
 		self.detectGrid.set_focus_chain([self.inputVID, self.inputPID, self.boutonConnect])
 
+		global VID
+		VID = "0"
+		global PID
+		PID = "0"
 
 		self.window.show_all()
 
@@ -113,17 +130,106 @@ class managegui:
 
 	# Receive button
 	def on_boutonRecevoir_clicked(self, object, data=None):
-		#usbPort = self.inputPort.get_text()
-		""" ICI IL FAUT LIRE LES DONNEES DU BUS ET INSÉRER DANS LA VARIABLE UsbDataRead """
-		UsbDataRead = "Default value"
-		self.inputRecevoir.set_text(UsbDataRead)
+		if VID != 0 and PID != 0:
+			# Search the device
+			device = usb.core.find(idVendor=VID, idProduct=PID)
+
+			if device is None:
+				errorstring = "Device not found: pid={} vid={}".format(VID, PID)
+				self.labelLastchange.set_text(errorstring)
+			else:
+				self.labelLastchange.set_text("Device found")
+				UsbDataRead = "Default Value"
+				"""
+				# GET THE SPEED OF THE DEVICE
+				# To determine the maximum size of packet to read
+				# 	
+				# 	LOW = 1
+				# 	FULL = 2
+				# 	HIGH = 3
+				# 	SUPER = 4
+				# 	UNKNOWN = 0
+				speed = device.speed
+				if speed == 1:
+					# The only size of packet is 8 bytes
+					size = 8
+				elif speed == 2 or speed == 3:
+					# The maximum size of packet is 64 bytes
+					size = 64
+				elif speed == 4:
+					# The maximum size of packet is 1024 bytes
+					size = 1024
+				else:
+					size = 8 # Take no risk
+
+				# GET THE CONFIGURATION OF THE DEVICE
+				config = device.get_active_configuration()
+
+				# GET THE INTERFACE (example: Human Interface Device)
+				interface = config[(0,0)]
+
+				# WE WANT TO WRITE SOMETHING. WE NEED AN ENDPOINT
+				endpoint = usb.util.find_descriptor(
+					interface,
+					# Match the first OUT Endpoint 
+					custom_match = \
+					lambda e: \
+						usb.util.endpoint_direction(e.bEndpointAddress) == \
+						usb.util.ENDPOINT_IN)
+			
+				assert endpoint is not None
+			
+				# Read data
+				UsbDataRead = endpoint.read(size, 3000) # Timeout 3000ms
+				statusstring = "Sent: {} | Total of: {} byte.s".format(UsbDataRead, len(UsbDataWrite))
+				self.labelLastchange.set_text(statusstring)
+				"""
+			self.inputRecevoir.set_text(UsbDataRead)
+		else:
+			self.labelLastchange.set_text("Not connected to any device")
 
 	# Send button
 	def on_boutonEnvoyer_clicked(self, object, data=None):
-		usbPort = self.inputPort.get_text()
-		""" ICI IL FAUT ÉCRIRE LES DONNEES VERS LE BUS """
-		UsbDataWrite = self.inputEnvoyer.get_text()
-		print(UsbDataWrite)
+		if VID != 0 and PID != 0:
+			UsbDataWrite = self.inputEnvoyer.get_text()
+
+			if UsbDataWrite:
+				# Search the device
+				device = usb.core.find(idVendor=VID, idProduct=PID)
+				print(device)
+
+				if device is None:
+					errorstring = "Device not found: pid={} vid={}".format(VID, PID)
+					self.labelLastchange.set_text(errorstring)
+				else:
+					self.labelLastchange.set_text("Device found")
+					"""
+					# GET THE CONFIGURATION OF THE DEVICE
+					config = device.get_active_configuration()
+
+					# GET THE INTERFACE (example: Human Interface Device)
+					interface = config[(0,0)]
+
+					# WE WANT TO WRITE SOMETHING. WE NEED AN ENDPOINT
+					endpoint = usb.util.find_descriptor(
+						interface,
+						# Match the first OUT Endpoint 
+						custom_match = \
+						lambda e: \
+							usb.util.endpoint_direction(e.bEndpointAddress) == \
+							usb.util.ENDPOINT_OUT)
+				
+					assert endpoint is not None
+				
+					# Write data
+					size = endpoint.write(UsbDataWrite, 3000) # Timeout 3000ms
+					statusstring = "Sent: {} | Total of: {} byte.s".format(UsbDataWrite, size)
+					self.labelLastchange.set_text(statusstring)
+					"""
+			else:
+				self.labelLastchange.set_text("No data entered")
+		else:
+			self.labelLastchange.set_text("Not connected to any device")
 
 	# Refresh button
 	""" The output of the 'lsusb' command is more precise than the function of usb.core """
@@ -169,31 +275,52 @@ class managegui:
 			self.terminalBuffer.set_text(tip+output1)
 		self.labelLastchange.set_text("Liste des appareils rafraichie")
 	
-	def on_inputVID_key_press_event(self, object, ev, data=None):
-		if ev.keyval == Gdk.KEY_Return:
+	def on_inputVID_key_press_event(self, object, event, data=None):
+		if event.keyval == 65421: # Return key
 			self.boutonConnect.activate()
-	def on_inputPID_key_press_event(self, object, ev, data=None):
-		if ev.keyval == Gdk.KEY_Return:
+	def on_inputPID_key_press_event(self, object, event, data=None):
+		if event.keyval == 65421: # Return key
 			self.boutonConnect.activate()
 
 	# Connect button
 	def on_boutonConnect_clicked(self, object, data=None):
+		global VID # FOR SEND / RECEIVE FUNCTIONS TO BE ABLE TO GET THE IDs
+		global PID # WHEN A BUTTON IS CLICKED. AVOIDS POTENTIAL PROBLEMS
+
 		try:
-			VID = int(self.inputVID.get_text(), 16)
-			PID = int(self.inputPID.get_text(), 16)
+			# Freeze the entry to variables to avoid problems
+			localstrVID = self.inputVID.get_text()
+			localstrPID = self.inputPID.get_text()
+
+			# Convert them to int
+			localintVID = int(localstrVID, 16)
+			localintPID = int(localstrPID, 16)
+
+			"""
+			_WHAT IS DONE NEXT_ :
+				>>> device = usb.core.find(idVendor=0x093A, idProduct=0x2510) # An USB Mouse
+				>>> device
+				<DEVICE ID 093a:2510 on Bus 001 Address 006>
+				>>> config = device.get_active_configuration() # Config already set by distro drivers
+				>>> config
+				<CONFIGURATION 1: 100 mA>
+				>>> interface = config[(0,0)]
+				>>> interface
+				<INTERFACE 0: Human Interface Device>
+			"""
 
 			# Search the device
-			device = usb.core.find(idVendor=VID, idProduct=PID)
+			device = usb.core.find(idVendor=localintVID, idProduct=localintPID)
 
 			if device is None:
 				self.detectLabel.set_markup("<span foreground='#DD0000'>Non trouvé</span>")
 				self.labelLastchange.set_text("Échec de connexion")
 			else:
-				# À PARTIR D'ICI, ON CONSIDÈRE QUE LE MCU EST CONNECTÉ À L'ORDINATEUR
-				# PRÈS À COMMUNIQUER DES DONNÉES
-				# La première étape à partir d'ici est l'énumération 
+				VID = localintVID # The global vid & pid are modified
+				PID = localintPID # because the device has been found
 
-				# Lalks' note : (CHECK PAGE 192 DOC PIC18F2455)
+
+				# À PARTIR D'ICI, ON CONSIDÈRE QUE L'APPAREIL EST CONNECTÉ À L'ORDINATEUR (le kernel a géré le setup)
 				
 				"""
 				DONC À PARTIR D'ICI, IL FAUT PROCÉDER À "SET CONFIGURATION", ÉTAPE 8 ENUMERATION
@@ -202,30 +329,16 @@ class managegui:
 				pour mettre en place une configuration spécifique : tout se fait automatiquement
 				"""
 
-				""" I COMMENTED TO NOT DAMAGE DEVICE WHEN CLICKED THE BUTTON
+				""" I COMMENTED TO NOT DAMAGE THE DEVICE WHEN CLICKED THE BUTTON
 					(TO UNCOMMENT WHEN SURE OF THE FUNCTION !)
 
-				### SET THE CONFIGURATION
-				# Sets the first configuration
+				# SET THE CONFIGURATION
+				# Sets the first configuration found
+				# Important : if the device has more than one configuration possible
+							  you have to add an argument, see the pyusb github repo
 				device.set_configuration()
 
-				# Get an endpoint instance | NEED TO CLARIFY WHAT IS DONE HERE
-				cfg = device.get_active_configuration()
-				intf = cfg[(0,0)]
-
-				# NEED TO CLARIFY WHAT IS DONE HERE
-				ep = usb.util.find_descriptor(
-					intf,
-					# Match the first OUT Endpoint 
-					custom_match = \
-					lambda e: \
-						usb.util.endpoint_direction(e.bEndpointAddress) == \
-						usb.util.ENDPOINT_OUT)
-
-				assert ep is not None
-
-				# Write data
-				ep.write(0xF0)
+				
 				
 				self.detectLabel.set_markup("<span foreground='#00AA00'>Connecté !</span>")
 				self.labelLastchange.set_text("Connexion établie")
@@ -244,6 +357,11 @@ class managegui:
 	def on_windowLicence_destroy(self, object, data=None):
 		print("Destoyed") # Debug purpose
 		self.windowLicence.hide() # HAVE TO CHECK AROUND HERE !! IT DOESN'T QUIT PROPERLY THE WINDOW
+	def on_Credits_activate(self, object, data=None):
+		self.windowCredits.show()
+	def on_windowCredits_destroy(self, object, data=None):
+		print("Destoyed") # Debug purpose
+		self.windowCredits.hide() # HAVE TO CHECK AROUND HERE !! IT DOESN'T QUIT PROPERLY THE WINDOW
 
 if __name__ == "__main__":
 	main = managegui()
