@@ -25,6 +25,11 @@ Tested on :
 ![alt text](https://github.com/Lalks/General-USB-Client/blob/master/SCREENSHOTS/screenshot-01.png)
 
 ## Changelog
+**0.03**
+- replaced the terminal output (text) by a dynamic tree view
+- the "extended" checkbox is removed thanks to the dynamic tree view which let the user choose the information
+- temporary removed the menubar
+
 **0.02**
 - finished non-tested backend of the receive function
 - finished non-tested backend of the send function
