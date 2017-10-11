@@ -65,6 +65,8 @@ from gi.repository import Gtk, Pango, GObject
 import sys
 import os
 
+sys.path.append("./pyusb/")
+
 import usb.core # to use pyusb
 import usb.util # to use pyusb
 
