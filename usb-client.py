@@ -33,26 +33,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 CHANGELOG
-0.03 - replaced the terminal output (text) by a dynamic tree view
-	 - the "extended" checkbox is removed thanks to the dynamic tree view which let the user choose the information
-	 - temporary removed the menubar
+0.0.3 - replaced the terminal output (text) by a dynamic tree view
+	  - the "extended" checkbox is removed thanks to the dynamic tree view which let the user choose the information
+	  - temporary removed the menubar
 
-0.02 - finished non-tested backend of the receive function
-	 - finished non-tested backend of the send function
-	 - finished non-tested backend of the connect function
-	 - fixed bug on Return key shortcut on PID and VID entries
-	 - updated title on Glade file
-	 - changed font face of the textview 'terminalOutput'
-	 - changed icon
-	 - changed format Credits and Licence windows
-	 - fix display of Credits window
+0.0.2 - finished non-tested backend of the receive function
+	  - finished non-tested backend of the send function
+	  - finished non-tested backend of the connect function
+	  - fixed bug on Return key shortcut on PID and VID entries
+	  - updated title on Glade file
+	  - changed font face of the textview 'terminalOutput'
+	  - changed icon
+	  - changed format Credits and Licence windows
+	  - fix display of Credits window
 
-0.01 - updated widgets' positions (progress bars, buttons, entries)
-	 - replaced the lsusb command output by a function made in the program with pyusb (with Vendor and Product names resolver from IDs) 
-	 - added 'extended' mode for the output about the devices that are connected to the computer
-	 - changed font face of the textview 'terminalOutput'
-	 - added Return key shortcut on PID and VID entries
-	 - fixed child list to be able to Tab on VID -> PID -> Connect Button
+0.0.1 - updated widgets' positions (progress bars, buttons, entries)
+	  - replaced the lsusb command output by a function made in the program with pyusb (with Vendor and Product names resolver from IDs) 
+	  - added 'extended' mode for the output about the devices that are connected to the computer
+	  - changed font face of the textview 'terminalOutput'
+	  - added Return key shortcut on PID and VID entries
+	  - fixed child list to be able to Tab on VID -> PID -> Connect Button
 
 
 """
@@ -65,7 +65,7 @@ from gi.repository import Gtk, Pango, GObject
 import sys
 import os
 
-sys.path.append("./pyusb/")
+sys.path.append("./pyusb/") # For the user to not have to install pyusb /!\ Need to be maintained updated
 
 import usb.core # to use pyusb
 import usb.util # to use pyusb
@@ -431,7 +431,7 @@ class managegui:
 
 
 				# À PARTIR D'ICI, ON CONSIDÈRE QUE L'APPAREIL EST CONNECTÉ À L'ORDINATEUR (le kernel a géré le setup)
-				
+				# FROM THIS POINT, WE CONSIDER THAT THE DEVICE IS CONNECTED TO THE COMPUTER (the kernel managed the setup)
 				"""
 				DONC À PARTIR D'ICI, IL FAUT PROCÉDER À "SET CONFIGURATION", ÉTAPE 8 ENUMERATION
 
@@ -470,7 +470,7 @@ class managegui:
 		# m_ids : list where the row's data are going to be stored
 		m_ids = list()
 
-		# m_item = the row kind of place, index
+		# m_item = the row's 'kind of' place, index
 		m_item = k_list.get_iter(selection)
 
 		m_ids.append(k_list.get_value(m_item, 0)) # VID
@@ -520,5 +520,10 @@ class managegui:
 		self.windowCredits.hide() # HAVE TO CHECK AROUND HERE !! IT DOESN'T QUIT PROPERLY THE WINDOW
 
 if __name__ == "__main__":
-	main = managegui()
-	Gtk.main()
+	# Check sudo/root. The USB communications need permissions. Being as root is easier than checking if the user is part of a certain group
+	if os.getuid() == 0: # If root / su / sudo... then the program will work correctly
+		main = managegui()
+		Gtk.main()
+	else:
+		print("You have to execute it as root")
+		sys.exit(0)
